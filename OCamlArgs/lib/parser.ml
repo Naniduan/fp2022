@@ -1,8 +1,8 @@
 (** Copyright 2021-2022, Kakadu and contributors *)
 
 (** SPDX-License-Identifier: LGPL-3.0-or-later *)
-open Angstrom
 
+open Angstrom
 open Ast
 
 let is_space = function

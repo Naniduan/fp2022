@@ -1,1 +1,1 @@
-Format.printf "REPL isn't implemented"
+let () = Format.printf "REPL isn't implemented"

@@ -1,3 +1,7 @@
+(** Copyright 2021-2022, Kakadu and contributors *)
+
+(** SPDX-License-Identifier: LGPL-3.0-or-later *)
+
 open Ast
 open Base
 open Interpret
@@ -360,15 +364,13 @@ let infer_ptrn =
   helper TypeEnv.empty
 ;;
 
-let par_to_arg paramtyp =
-  match paramtyp with
+let par_to_arg = function
   | ParSimple _ -> ASimple
   | ParOptional s -> AOptional s
   | ParLabeled s -> ALabeled s
 ;;
 
-let argname paramtyp =
-  match paramtyp with
+let argname = function
   | ParSimple s -> s
   | ParOptional s -> s
   | ParLabeled s -> s
