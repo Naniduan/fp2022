@@ -58,6 +58,12 @@ let rec pp_argtyp fmt = function
   | AOptional name -> fprintf fmt "?%s:" name
 ;;
 
+let rec pp_argtyp_without_tild fmt = function
+  | ASimple -> ()
+  | ALabeled name -> fprintf fmt "%s:" name
+  | AOptional name -> fprintf fmt "?%s:" name
+;;
+
 let rec pp_typ fmt = function
   | TBool -> fprintf fmt "bool"
   | TInt -> fprintf fmt "int"
@@ -74,7 +80,7 @@ let rec pp_typ fmt = function
   | TList typ -> fprintf fmt "%a list" pp_typ typ
   | TVar name -> fprintf fmt "'%n" name
   | TFun (_, argtyp, argt, rett) ->
-    fprintf fmt "(%a%a -> %a)" pp_argtyp argtyp pp_typ argt pp_typ rett
+    fprintf fmt "(%a%a -> %a)" pp_argtyp_without_tild argtyp pp_typ argt pp_typ rett
   | TOpt typ -> fprintf fmt "((%a) option)" pp_typ typ
   | TUninf -> fprintf fmt "(Uninferred)"
 ;;

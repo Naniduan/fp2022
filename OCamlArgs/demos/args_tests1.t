@@ -6,9 +6,9 @@
   > let d = ratio ~num:4 ~den:2
   > ;;
   > EOF
-  val ratio : (~num:int -> (~den:int -> int)) = <fun>
-  val a : (~num:int -> int) = <fun>
-  val c : (~den:int -> int) = <fun>
+  val ratio : (num:int -> (den:int -> int)) = <fun>
+  val a : (num:int -> int) = <fun>
+  val c : (den:int -> int) = <fun>
   val b : int = 2
   val d : int = 2
 
@@ -19,8 +19,8 @@
   > let x = ratio_caller ratio
   > ;;
   > EOF
-  val ratio_caller : ((~den:int -> (~num:int -> '3)) -> '3) = <fun>
-  val ratio : (~num:int -> (~den:int -> int)) = <fun>
+  val ratio_caller : ((den:int -> (num:int -> '3)) -> '3) = <fun>
+  val ratio : (num:int -> (den:int -> int)) = <fun>
   val x : int = 2
 
   $ cat << EOF | ./demo.exe -

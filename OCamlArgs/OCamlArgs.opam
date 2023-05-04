@@ -16,6 +16,7 @@ depends: [
   "qcheck-core"
   "ppx_expect"
   "ppx_deriving"
+  "ppx_show"
   "odoc" {with-doc}
   "ocamlformat" {build}
   "base"
