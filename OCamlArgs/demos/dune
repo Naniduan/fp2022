@@ -1,0 +1,8 @@
+(executable
+ (name demo)
+ (modules demo)
+ (public_name demo)
+ (libraries stdio ocamlargs_lib))
+
+(cram
+ (deps ./demo.exe))

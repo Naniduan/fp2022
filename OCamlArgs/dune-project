@@ -1,0 +1,34 @@
+(lang dune 2.8)
+
+(generate_opam_files true)
+
+(cram enable)
+
+(license LGPL-3.0-or-later)
+
+(authors "Igor Korobitsyn")
+
+(maintainers "Igor Korobitsyn")
+
+(bug_reports "https://github.com/Naniduan/fp2022")
+
+(homepage "https://github.com/Naniduan/fp2022")
+
+(package
+ (name OCamlArgs) ; FIXME and regenerate .opam file using 'dune build @install'
+ (synopsis "OCaml with labeled and optional arguments")
+ (description
+  "FIXME. A longer description, for example, which are the most interesing features being supported, etc.")
+ (version 0.1)
+ (depends
+  dune
+  angstrom
+  (ppx_inline_test :with-test)
+  qcheck-core
+  ppx_expect
+  ppx_deriving
+  (odoc :with-doc)
+  (ocamlformat :build)
+  base
+  ; After adding dependencies to 'dune' files and the same dependecies here too
+  ))
