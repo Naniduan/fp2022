@@ -192,7 +192,7 @@ let rec pp_pat fmt = function
 ;;
 
 type recty =
-  | Recusive
+  | Recursive
   | Not_recursive
 [@@deriving eq]
 
@@ -235,7 +235,7 @@ let rec pp_dec fmt (recty, name, typ, expr) =
   fprintf
     fmt
     "let %s%s : %a = %a"
-    (if recty = Recusive then "rec " else "")
+    (if recty = Recursive then "rec " else "")
     name
     pp_typ
     typ

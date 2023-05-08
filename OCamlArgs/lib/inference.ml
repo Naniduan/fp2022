@@ -468,7 +468,7 @@ let infer =
         let* s2, t3, e2 = helper (TypeEnv.extend env2 (x, t2)) e2 in
         let* final_subst = Subst.compose s1 s2 in
         return (final_subst, t3, ELet ((Not_recursive, x, TUninf, e1), e2))
-      | ELet ((Recusive, x, _, e1), e2) ->
+      | ELet ((Recursive, x, _, e1), e2) ->
         let* tv = fresh_var in
         let env = TypeEnv.extend env (x, S (VarSet.empty, tv)) in
         let* s1, t1, e1 = helper env e1 in
@@ -478,7 +478,7 @@ let infer =
         let t2 = generalize env (Subst.apply s tv) in
         let* s2, t2, e2 = helper TypeEnv.(extend (apply s env) (x, t2)) e2 in
         let* final_subst = Subst.compose s s2 in
-        return (final_subst, t2, ELet ((Recusive, x, TUninf, e1), e2))
+        return (final_subst, t2, ELet ((Recursive, x, TUninf, e1), e2))
       | ETuple es ->
         let* subs, ts, es =
           RList.fold_left

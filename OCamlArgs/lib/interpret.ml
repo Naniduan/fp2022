@@ -291,7 +291,7 @@ end = struct
 
   and add_dec dec env =
     let recty, name, typ, expr = dec in
-    if recty = Recusive
+    if recty = Recursive
     then (
       match expr with
       | EFun (prmtyp, _, body) ->
