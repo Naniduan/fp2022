@@ -168,7 +168,7 @@ let pdec_base pexpr =
   pstr "let"
   *> lift3
        (fun is_rec name expr -> d_dec is_rec name t_uninf expr)
-       (pstr1 "rec" *> return Recusive <|> return Not_recursive)
+       (pstr1 "rec" *> return Recursive <|> return Not_recursive)
        (ptoken1 pid)
        (pstr "=" *> pexpr)
 ;;
