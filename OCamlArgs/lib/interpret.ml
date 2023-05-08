@@ -36,7 +36,7 @@ end = struct
     | VBool of bool
     | VTuple of value list
     | VList of value list
-    | VFun of ((argtyp * value, r_err) t Lazy.t -> (value, r_err) t)
+    | VFun of ((argtyp * value, r_err) t -> (value, r_err) t)
     | VNone
     | VSome of value
 
@@ -52,8 +52,7 @@ end = struct
   let v_bool b = VBool b
   let v_tuple l = VTuple l
   let v_list l = VList l
-  let v_lfun f = VFun f
-  let v_fun f = v_lfun (fun x -> Lazy.force x >>= f)
+  let v_fun f = VFun (fun x -> x >>= f)
   let v_fun2 f = v_fun (fun x -> return (v_fun (fun y -> f (x, y))))
   let v_some s = VSome s
 
@@ -167,6 +166,25 @@ end = struct
     | Some r -> return r
   ;;
 
+  let eval_int_binop binop x y =
+    Lazy.force y
+    >>= fun y ->
+    match x, y with
+    | VInt x, VInt y -> binop x y
+    | _ -> fail (Incorrect_typ (VTuple [ x; y ]))
+  ;;
+
+  let eval_bool_binop ~pref x y =
+    match x with
+    | VBool x when x = pref -> return (v_bool pref)
+    | VBool _ ->
+      Lazy.force y
+      >>= (function
+      | VBool y -> return (v_bool y)
+      | y -> fail (Incorrect_typ y))
+    | _ -> fail (Incorrect_typ x)
+  ;;
+
   let rec e_fun_eval (argtyp, arg) ?(mem_args = []) prmtyp body env =
     let eval_body env =
       List.fold_left
@@ -174,7 +192,7 @@ end = struct
           acc
           >>= fun acc ->
           match acc with
-          | VFun fv -> fv (lazy (return arg))
+          | VFun fv -> fv (return arg)
           | _ -> fail (Incorrect_typ acc))
         (eval body env)
         mem_args
@@ -195,10 +213,35 @@ end = struct
       (match un_op, value1 with
        | Neg, VInt n -> return (VInt (-n))
        | _ -> fail (Incorrect_typ value1))
-    | EBinop (expr1, un_op, expr2) ->
+    | EBinop (expr1, bin_op, expr2) ->
       let* value1 = eval expr1 env in
-      let* value2 = eval expr2 env in
-      (match value1, un_op, value2 with
+      let value2 = lazy (eval expr2 env) in
+      (match bin_op with
+       | Add -> eval_int_binop (fun x y -> return (v_int (x + y))) value1 value2
+       | Sub -> eval_int_binop (fun x y -> return (v_int (x - y))) value1 value2
+       | Mul -> eval_int_binop (fun x y -> return (v_int (x * y))) value1 value2
+       | Div ->
+         eval_int_binop
+           (fun x y ->
+             match x, y with
+             | _, 0 -> fail Div0
+             | _, _ -> return (v_int (x / y)))
+           value1
+           value2
+       | Les -> eval_int_binop (fun x y -> return (v_bool (x < y))) value1 value2
+       | Gre -> eval_int_binop (fun x y -> return (v_bool (x > y))) value1 value2
+       | Eq -> eval_int_binop (fun x y -> return (v_bool (x = y))) value1 value2
+       | Leseq -> eval_int_binop (fun x y -> return (v_bool (x <= y))) value1 value2
+       | Greeq -> eval_int_binop (fun x y -> return (v_bool (x >= y))) value1 value2
+       | Neq -> eval_int_binop (fun x y -> return (v_bool (x != y))) value1 value2
+       | And -> eval_bool_binop ~pref:false value1 value2
+       | Or -> eval_bool_binop ~pref:true value1 value2
+       | Con ->
+         Lazy.force value2
+         >>= (function
+         | VList value2 -> return (v_list (value1 :: value2))
+         | value2 -> fail (Incorrect_typ value2)))
+      (* (match value1, un_op, value2 with
        | VInt x, Add, VInt y -> return (VInt (x + y))
        | VInt x, Sub, VInt y -> return (VInt (x - y))
        | VInt x, Mul, VInt y -> return (VInt (x * y))
@@ -215,7 +258,7 @@ end = struct
        | VBool x, And, VBool y -> return (VBool (x && y))
        | VBool x, Or, VBool y -> return (VBool (x || y))
        | x, Con, VList y -> return (VList (x :: y))
-       | _ -> fail (Incorrect_typ (VTuple [ value1; value2 ])))
+       | _ -> fail (Incorrect_typ (VTuple [ value1; value2 ]))) *)
     | EVal name -> lookup_val name env
     | EConst (CInt n) -> return (v_int n)
     | EConst (CString s) -> return (v_string s)
@@ -224,7 +267,7 @@ end = struct
     | EApp (argtyp, fn, arg) ->
       eval fn env
       >>= (function
-      | VFun fv -> fv (lazy (eval arg env >>| fun arg -> argtyp, arg))
+      | VFun fv -> fv (eval arg env >>| fun arg -> argtyp, arg)
       | v -> fail (Incorrect_typ v))
     | ETuple l -> all (List.map (fun e -> eval e env) l) >>| v_tuple
     | ELet (dec, expr) -> add_dec dec env >>= eval expr

@@ -25,7 +25,6 @@ and typ =
   | TBool
   | TInt
   | TString
-  | TRef of typ
   | TTuple of typ list
   | TList of typ
   | TVar of int
@@ -43,7 +42,6 @@ let par_labeled name = ParLabeled name
 let t_bool = TBool
 let t_int = TInt
 let t_string = TString
-let t_ref typ = TRef typ
 let t_tuple types = TTuple types
 let t_unit = t_tuple []
 let t_list typ = TList typ
@@ -68,7 +66,6 @@ let rec pp_typ fmt = function
   | TBool -> fprintf fmt "bool"
   | TInt -> fprintf fmt "int"
   | TString -> fprintf fmt "string"
-  | TRef typ -> fprintf fmt "%a ref" pp_typ typ
   | TTuple types ->
     fprintf
       fmt
@@ -107,7 +104,6 @@ type bin_op =
   | And
   | Or
   | Con
-  | Asgmt
 [@@deriving eq]
 
 let add = Add
@@ -123,7 +119,6 @@ let neq = Neq
 let and_ = And
 let or_ = Or
 let con = Con
-let asgmt = Asgmt
 
 let pp_bin_op fmt op =
   fprintf
@@ -141,8 +136,7 @@ let pp_bin_op fmt op =
      | Neq -> "!="
      | And -> "&&"
      | Or -> "||"
-     | Con -> "::"
-     | Asgmt -> ":=")
+     | Con -> "::")
 ;;
 
 type const =

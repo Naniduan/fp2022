@@ -120,14 +120,14 @@ module Type = struct
   let rec occurs_in v = function
     | TVar b -> b = v
     | TFun (_, _, l, r) -> occurs_in v l || occurs_in v r
-    | TInt | TBool | TString | TList _ | TOpt _ | TTuple _ | TUninf | TRef _ -> false
+    | TInt | TBool | TString | TList _ | TOpt _ | TTuple _ | TUninf -> false
   ;;
 
   let free_vars =
     let rec helper acc = function
       | TVar b -> VarSet.add b acc
       | TFun (_, _, l, r) -> helper (helper acc l) r
-      | TInt | TBool | TString | TList _ | TOpt _ | TTuple _ | TUninf | TRef _ -> acc
+      | TInt | TBool | TString | TList _ | TOpt _ | TTuple _ | TUninf -> acc
     in
     helper VarSet.empty
   ;;
@@ -194,7 +194,7 @@ end = struct
       | TFun (ety, argtyp, l, r) -> TFun (ety, argtyp, helper l, helper r)
       | TList t -> TList (helper t)
       | TTuple ts -> TTuple (List.map ts ~f:helper)
-      | (TInt | TBool | TString | TOpt _ | TUninf | TRef _) as other -> other
+      | (TInt | TBool | TString | TOpt _ | TUninf) as other -> other
     in
     helper
   ;;
@@ -513,8 +513,7 @@ let infer =
            let* s3 = unify TBool t1 in
            let* s4 = unify TBool (Subst.apply s3 t2) in
            let* s = Subst.compose_all [ s1; s2; s3; s4 ] in
-           return (s, TBool)
-         | _ -> fail (`Unification_failed (t1, t2)))
+           return (s, TBool))
         >>| fun (s, t) -> s, t, EBinop (e1, bin_op, e2)
       | EUnop (un_op, e1) ->
         let* s1, t1, e1 = helper env e1 in
